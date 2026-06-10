@@ -1,0 +1,258 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Core Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function emailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+    
+    // Custom RBAC via Database lookup
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token != null && request.auth.token.email != null && request.auth.token.email.lower() == '12kcnischal@gmail.com') ||
+        (exists(/databases/$(database)/documents/team/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/team/$(request.auth.uid)).data.role == 'Admin')
+      );
+    }
+
+    function isUnseeded() {
+      return !exists(/databases/$(database)/documents/portfolio/hero);
+    }
+    
+    // Validation helpers
+    function isValidPortfolioHero(data) {
+      return data.keys().hasAll(['title', 'subtitle', 'description', 'ctaText', 'githubUrl', 'linkedinUrl', 'emailContact', 'avatarUrl', 'showResumeBtn', 'resumeUrl'])
+        && data.keys().size() == 10
+        && data.title is string && data.title.size() <= 200
+        && data.subtitle is string && data.subtitle.size() <= 200
+        && data.description is string && data.description.size() <= 1000
+        && data.ctaText is string && data.ctaText.size() <= 100
+        && data.githubUrl is string && data.githubUrl.size() <= 500
+        && data.linkedinUrl is string && data.linkedinUrl.size() <= 500
+        && data.emailContact is string && data.emailContact.size() <= 200
+        && data.avatarUrl is string && data.avatarUrl.size() <= 1000
+        && data.showResumeBtn is bool
+        && data.resumeUrl is string && data.resumeUrl.size() <= 500;
+    }
+    
+    function isValidPortfolioSettings(data) {
+      return data.keys().hasAll(['primaryColor', 'secondaryColor', 'backgroundColor', 'textColor', 'fontFamily', 'cornerRadius', 'animationsEnabled', 'animationStyle', 'animationDuration', 'animationDelay', 'socialLinks'])
+        && data.primaryColor is string && data.primaryColor.size() <= 30
+        && data.secondaryColor is string && data.secondaryColor.size() <= 30
+        && data.backgroundColor is string && data.backgroundColor.size() <= 30
+        && data.textColor is string && data.textColor.size() <= 30
+        && data.fontFamily is string && data.fontFamily.size() <= 100
+        && (data.cornerRadius == 'none' || data.cornerRadius == 'medium' || data.cornerRadius == 'full')
+        && data.animationsEnabled is bool
+        && (data.animationStyle == 'fade' || data.animationStyle == 'slide' || data.animationStyle == 'zoom')
+        && data.animationDuration is int
+        && data.animationDelay is int
+        && data.socialLinks is list
+        && data.socialLinks.size() <= 10
+        && (!data.keys().hasAll(['heroBadgeText']) || (data.heroBadgeText is string && data.heroBadgeText.size() <= 500))
+        && (!data.keys().hasAll(['heroWelcomePrefix']) || (data.heroWelcomePrefix is string && data.heroWelcomePrefix.size() <= 500))
+        && (!data.keys().hasAll(['aboutMilestoneLabel']) || (data.aboutMilestoneLabel is string && data.aboutMilestoneLabel.size() <= 500))
+        && (!data.keys().hasAll(['aboutSectionHeading']) || (data.aboutSectionHeading is string && data.aboutSectionHeading.size() <= 500))
+        && (!data.keys().hasAll(['aboutVerificationText']) || (data.aboutVerificationText is string && data.aboutVerificationText.size() <= 500))
+        && (!data.keys().hasAll(['aboutTimelineHeading']) || (data.aboutTimelineHeading is string && data.aboutTimelineHeading.size() <= 500))
+        && (!data.keys().hasAll(['skillsSubLabel']) || (data.skillsSubLabel is string && data.skillsSubLabel.size() <= 500))
+        && (!data.keys().hasAll(['skillsSectionHeading']) || (data.skillsSectionHeading is string && data.skillsSectionHeading.size() <= 500))
+        && (!data.keys().hasAll(['contactSubLabel']) || (data.contactSubLabel is string && data.contactSubLabel.size() <= 500))
+        && (!data.keys().hasAll(['contactSectionHeading']) || (data.contactSectionHeading is string && data.contactSectionHeading.size() <= 500))
+        && (!data.keys().hasAll(['contactSidebarTitle']) || (data.contactSidebarTitle is string && data.contactSidebarTitle.size() <= 500))
+        && (!data.keys().hasAll(['contactSidebarContent']) || (data.contactSidebarContent is string && data.contactSidebarContent.size() <= 4000))
+        && (!data.keys().hasAll(['contactFormTitle']) || (data.contactFormTitle is string && data.contactFormTitle.size() <= 500))
+        && (!data.keys().hasAll(['contactCtaText']) || (data.contactCtaText is string && data.contactCtaText.size() <= 500))
+        && (!data.keys().hasAll(['contactFooterLabel']) || (data.contactFooterLabel is string && data.contactFooterLabel.size() <= 500))
+        && (!data.keys().hasAll(['footerLeftText']) || (data.footerLeftText is string && data.footerLeftText.size() <= 500))
+        && (!data.keys().hasAll(['footerRightText']) || (data.footerRightText is string && data.footerRightText.size() <= 1000))
+        && (!data.keys().hasAll(['cardGlassEffect']) || (data.cardGlassEffect == 'frosted' || data.cardGlassEffect == 'translucent' || data.cardGlassEffect == 'deep-solid'))
+        && (!data.keys().hasAll(['cardShadowGlow']) || (data.cardShadowGlow == 'none' || data.cardShadowGlow == 'soft-indigo' || data.cardShadowGlow == 'cosmic-purple'))
+        && (!data.keys().hasAll(['cardBorderStrength']) || (data.cardBorderStrength == 'normal' || data.cardBorderStrength == 'subtle' || data.cardBorderStrength == 'none'))
+        && (!data.keys().hasAll(['boxAnimationStiffness']) || data.boxAnimationStiffness is int)
+        && (!data.keys().hasAll(['boxAnimationDamping']) || data.boxAnimationDamping is int)
+        && (!data.keys().hasAll(['logoLetterOverride']) || (data.logoLetterOverride is string && data.logoLetterOverride.size() <= 10))
+        && (!data.keys().hasAll(['logoTextOverride']) || (data.logoTextOverride is string && data.logoTextOverride.size() <= 100))
+        && (!data.keys().hasAll(['logoSubTextOverride']) || (data.logoSubTextOverride is string && data.logoSubTextOverride.size() <= 150))
+        && (!data.keys().hasAll(['logoGradientColorFrom']) || (data.logoGradientColorFrom is string && data.logoGradientColorFrom.size() <= 30))
+        && (!data.keys().hasAll(['logoGradientColorTo']) || (data.logoGradientColorTo is string && data.logoGradientColorTo.size() <= 30))
+        && (!data.keys().hasAll(['logoGlowIntensity']) || (data.logoGlowIntensity == 'none' || data.logoGlowIntensity == 'soft' || data.logoGlowIntensity == 'vibrant'));
+    }
+    
+    function isValidPortfolioAbout(data) {
+      return data.keys().hasAll(['title', 'content', 'yearsOfExperience', 'highlightStats'])
+        && data.keys().size() == 4
+        && data.title is string && data.title.size() <= 200
+        && data.content is string && data.content.size() <= 2000
+        && data.yearsOfExperience is int
+        && data.highlightStats is list
+        && data.highlightStats.size() <= 10;
+    }
+    
+    // Supporting Banner Optionals validated in updated schema
+    function isValidProject(data) {
+      return data.keys().hasAll(['id', 'title', 'description', 'image', 'category', 'techStack', 'featured', 'clicksCount'])
+        && (data.keys().size() == 8 || (data.keys().size() == 9 && data.keys().hasAll(['liveUrl'])) || (data.keys().size() == 9 && data.keys().hasAll(['githubUrl'])) || (data.keys().size() == 10 && data.keys().hasAll(['liveUrl', 'githubUrl'])))
+        && data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 1000
+        && data.image is string && data.image.size() <= 1000
+        && (data.category == 'Web' || data.category == 'Mobile' || data.category == 'Design' || data.category == 'Utility')
+        && data.techStack is list && data.techStack.size() <= 20
+        && data.featured is bool
+        && data.clicksCount is int;
+    }
+    
+    function isValidSkill(data) {
+      return data.keys().hasAll(['id', 'name', 'category', 'level'])
+        && data.keys().size() == 4
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 100
+        && (data.category == 'Frontend' || data.category == 'Backend' || data.category == 'DevOps' || data.category == 'Design/Other')
+        && data.level is int && data.level >= 0 && data.level <= 100;
+    }
+    
+    function isValidTimelineEvent(data) {
+      return data.keys().hasAll(['id', 'role', 'company', 'period', 'description'])
+        && (data.keys().size() == 5 || (data.keys().size() == 6 && data.keys().hasAll(['logoColor'])))
+        && data.id is string && data.id.size() <= 128
+        && data.role is string && data.role.size() <= 200
+        && data.company is string && data.company.size() <= 200
+        && data.period is string && data.period.size() <= 100
+        && data.description is string && data.description.size() <= 1000;
+    }
+    
+    function isValidTeamMember(data) {
+      return data.keys().hasAll(['id', 'name', 'email', 'role', 'status', 'avatarUrl', 'lastActive'])
+        && data.keys().size() == 7
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 200
+        && data.email is string && data.email.size() <= 256
+        && (data.role == 'Admin' || data.role == 'Contributor' || data.role == 'Viewer')
+        && (data.status == 'Active' || data.status == 'Pending' || data.status == 'Suspended')
+        && data.avatarUrl is string && data.avatarUrl.size() <= 1000
+        && data.lastActive is string && data.lastActive.size() <= 100;
+    }
+    
+    function isValidContactMessage(data) {
+      return data.keys().hasAll(['id', 'name', 'email', 'subject', 'message', 'timestamp', 'read'])
+        && data.keys().size() == 7
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 200
+        && data.email is string && data.email.size() <= 256
+        && data.subject is string && data.subject.size() <= 300
+        && data.message is string && data.message.size() <= 5000
+        && data.timestamp is string && data.timestamp.size() <= 100
+        && data.read is bool;
+    }
+    
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['id', 'user', 'role', 'action', 'timestamp'])
+        && data.keys().size() == 5
+        && data.id is string && data.id.size() <= 128
+        && data.user is string && data.user.size() <= 200
+        && data.role == 'Admin'
+        && data.action is string && data.action.size() <= 500
+        && data.timestamp is string && data.timestamp.size() <= 100;
+    }
+    
+    function isValidAnalyticsMetric(data) {
+      return data.keys().hasAll(['date', 'views', 'clicks', 'contacts'])
+        && data.keys().size() == 4
+        && data.date is string && data.date.size() == 10
+        && data.views is int && data.views >= 0
+        && data.clicks is int && data.clicks >= 0
+        && data.contacts is int && data.contacts >= 0;
+    }
+    
+    // --- Collection Matching and RBAC Rules ---
+    
+    match /portfolio/{docId} {
+      allow read: if true;
+      allow write: if (isAdmin() || isUnseeded()) && (
+        (docId == 'hero' && isValidPortfolioHero(incoming())) ||
+        (docId == 'about' && isValidPortfolioAbout(incoming())) ||
+        (docId == 'settings' && isValidPortfolioSettings(incoming()))
+      );
+    }
+    
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create: if (isAdmin() || isUnseeded()) && isValidId(projectId) && isValidProject(incoming());
+      allow update: if isValidId(projectId) && isValidProject(incoming()) && (
+        // Public increment of project clicksCount is permitted to any guest
+        (incoming().diff(existing()).affectedKeys().hasOnly(['clicksCount'])) ||
+        // Absolute full update permitted to verified workspace administrators or unseeded
+        isAdmin() || isUnseeded()
+      );
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+    
+    match /skills/{skillId} {
+      allow read: if true;
+      allow create, update: if (isAdmin() || isUnseeded()) && isValidId(skillId) && isValidSkill(incoming());
+      allow delete: if isAdmin() && isValidId(skillId);
+    }
+    
+    match /timeline/{eventId} {
+      allow read: if true;
+      allow create, update: if (isAdmin() || isUnseeded()) && isValidId(eventId) && isValidTimelineEvent(incoming());
+      allow delete: if isAdmin() && isValidId(eventId);
+    }
+    
+    match /team/{memberId} {
+      allow read: if true;
+      allow create: if (isAdmin() || isUnseeded() || (isSignedIn() && request.auth.uid == memberId)) && isValidId(memberId) && isValidTeamMember(incoming());
+      allow update: if (isAdmin() || isUnseeded() || (isSignedIn() && request.auth.uid == memberId)) && isValidId(memberId) && isValidTeamMember(incoming());
+      allow delete: if isAdmin() && isValidId(memberId);
+    }
+    
+    match /messages/{messageId} {
+      allow read: if isAdmin();
+      allow create: if (isValidId(messageId) && isValidContactMessage(incoming())) || isUnseeded();
+      allow update: if (isAdmin() || isUnseeded()) && isValidId(messageId) && isValidContactMessage(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+      allow delete: if isAdmin() && isValidId(messageId);
+    }
+    
+    match /logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isValidId(logId) && isValidAuditLog(incoming()) && (
+        isAdmin() || isUnseeded()
+      );
+      allow update, delete: if false; // Security audit logs are immutable once committed
+    }
+    
+    match /analytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if (isValidId(analyticsId) && isValidAnalyticsMetric(incoming())) || isUnseeded();
+      allow update: if isValidId(analyticsId) && isValidAnalyticsMetric(incoming()) && (
+        // Public click tracking updates allowed: views, clicks, or contacts increment
+        (incoming().diff(existing()).affectedKeys().hasOnly(['views', 'clicks', 'contacts'])) ||
+        isAdmin() || isUnseeded()
+      );
+      allow delete: if isAdmin();
+    }
+  }
+}

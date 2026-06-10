@@ -1,0 +1,6 @@
+{
+  "name": "Nischal KC Portfolio Admin",
+  "description": "An upgraded highly customizable portfolio for Nischal KC featuring interactive components, transitions, and an admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

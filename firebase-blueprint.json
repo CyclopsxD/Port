@@ -1,0 +1,243 @@
+{
+  "entities": {
+    "PortfolioHero": {
+      "title": "PortfolioHero",
+      "description": "Hero section introduction text and contact links",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "description": { "type": "string" },
+        "ctaText": { "type": "string" },
+        "githubUrl": { "type": "string" },
+        "linkedinUrl": { "type": "string" },
+        "emailContact": { "type": "string", "format": "email" },
+        "avatarUrl": { "type": "string" },
+        "showResumeBtn": { "type": "boolean" },
+        "resumeUrl": { "type": "string" }
+      },
+      "required": ["title", "subtitle", "description", "ctaText", "githubUrl", "linkedinUrl", "emailContact", "avatarUrl", "showResumeBtn", "resumeUrl"]
+    },
+    "PortfolioAbout": {
+      "title": "PortfolioAbout",
+      "description": "About section text and highlighted statistics",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "yearsOfExperience": { "type": "integer" },
+        "highlightStats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "type": "string" }
+            },
+            "required": ["label", "value"]
+          }
+        }
+      },
+      "required": ["title", "content", "yearsOfExperience", "highlightStats"]
+    },
+    "PortfolioProject": {
+      "title": "PortfolioProject",
+      "description": "A showcase project entry in the portfolio",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "category": { "type": "string", "enum": ["Web", "Mobile", "Design", "Utility"] },
+        "techStack": { "type": "array", "items": { "type": "string" } },
+        "liveUrl": { "type": "string" },
+        "githubUrl": { "type": "string" },
+        "featured": { "type": "boolean" },
+        "clicksCount": { "type": "integer" }
+      },
+      "required": ["id", "title", "description", "image", "category", "techStack", "featured", "clicksCount"]
+    },
+    "PortfolioSkill": {
+      "title": "PortfolioSkill",
+      "description": "A technology skill with an expertise percentage level",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Frontend", "Backend", "DevOps", "Design/Other"] },
+        "level": { "type": "integer" }
+      },
+      "required": ["id", "name", "category", "level"]
+    },
+    "TimelineEvent": {
+      "title": "TimelineEvent",
+      "description": "An event of professional experience in the timeline",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "company": { "type": "string" },
+        "period": { "type": "string" },
+        "description": { "type": "string" },
+        "logoColor": { "type": "string" }
+      },
+      "required": ["id", "role", "company", "period", "description"]
+    },
+    "TeamMember": {
+      "title": "TeamMember",
+      "description": "A collaborator profile in the administration workspace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["Admin", "Contributor", "Viewer"] },
+        "status": { "type": "string", "enum": ["Active", "Pending", "Suspended"] },
+        "avatarUrl": { "type": "string" },
+        "lastActive": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "role", "status", "avatarUrl", "lastActive"]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "An inquiry received from the guest portal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["id", "name", "email", "subject", "message", "timestamp", "read"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "An event logging security or administration actions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user": { "type": "string" },
+        "role": { "type": "string", "enum": ["Admin", "Contributor", "Viewer"] },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "user", "role", "action", "timestamp"]
+    },
+    "AnalyticsMetric": {
+      "title": "AnalyticsMetric",
+      "description": "Daily aggregate views, clicks and contacts",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "views": { "type": "integer" },
+        "clicks": { "type": "integer" },
+        "contacts": { "type": "integer" }
+      },
+      "required": ["date", "views", "clicks", "contacts"]
+    },
+    "PortfolioSettings": {
+      "title": "PortfolioSettings",
+      "description": "Dynamic visual, textual, behavioral, theme and social configurations for the CMS",
+      "type": "object",
+      "properties": {
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "backgroundColor": { "type": "string" },
+        "textColor": { "type": "string" },
+        "fontFamily": { "type": "string" },
+        "cornerRadius": { "type": "string", "enum": ["none", "medium", "full"] },
+        "animationsEnabled": { "type": "boolean" },
+        "animationStyle": { "type": "string", "enum": ["fade", "slide", "zoom"] },
+        "animationDuration": { "type": "integer" },
+        "animationDelay": { "type": "integer" },
+        "socialLinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "platform": { "type": "string" },
+              "url": { "type": "string" },
+              "icon": { "type": "string" }
+            },
+            "required": ["platform", "url", "icon"]
+          }
+        },
+        "heroBadgeText": { "type": "string" },
+        "heroWelcomePrefix": { "type": "string" },
+        "aboutMilestoneLabel": { "type": "string" },
+        "aboutSectionHeading": { "type": "string" },
+        "aboutVerificationText": { "type": "string" },
+        "aboutTimelineHeading": { "type": "string" },
+        "skillsSubLabel": { "type": "string" },
+        "skillsSectionHeading": { "type": "string" },
+        "contactSubLabel": { "type": "string" },
+        "contactSectionHeading": { "type": "string" },
+        "contactSidebarTitle": { "type": "string" },
+        "contactSidebarContent": { "type": "string" },
+        "contactFormTitle": { "type": "string" },
+        "contactCtaText": { "type": "string" },
+        "contactFooterLabel": { "type": "string" },
+        "footerLeftText": { "type": "string" },
+        "footerRightText": { "type": "string" },
+        "cardGlassEffect": { "type": "string", "enum": ["frosted", "translucent", "deep-solid"] },
+        "cardShadowGlow": { "type": "string", "enum": ["none", "soft-indigo", "cosmic-purple"] },
+        "cardBorderStrength": { "type": "string", "enum": ["normal", "subtle", "none"] },
+        "boxAnimationStiffness": { "type": "integer" },
+        "boxAnimationDamping": { "type": "integer" },
+        "logoLetterOverride": { "type": "string" },
+        "logoTextOverride": { "type": "string" },
+        "logoSubTextOverride": { "type": "string" },
+        "logoGradientColorFrom": { "type": "string" },
+        "logoGradientColorTo": { "type": "string" },
+        "logoGlowIntensity": { "type": "string", "enum": ["none", "soft", "vibrant"] }
+      },
+      "required": ["primaryColor", "secondaryColor", "backgroundColor", "textColor", "fontFamily", "cornerRadius", "animationsEnabled", "animationStyle", "animationDuration", "animationDelay", "socialLinks"]
+    }
+  },
+  "firestore": {
+    "portfolio/hero": {
+      "schema": "PortfolioHero",
+      "description": "Stores the hero introduction section settings"
+    },
+    "portfolio/about": {
+      "schema": "PortfolioAbout",
+      "description": "Stores the about biography details"
+    },
+    "portfolio/settings": {
+      "schema": "PortfolioSettings",
+      "description": "CMS customization themes, fonts, animation settings, and social coordinates"
+    },
+    "projects/{projectId}": {
+      "schema": "PortfolioProject",
+      "description": "Portfolio project entries"
+    },
+    "skills/{skillId}": {
+      "schema": "PortfolioSkill",
+      "description": "Technical skills taxonomy list"
+    },
+    "timeline/{eventId}": {
+      "schema": "TimelineEvent",
+      "description": "Historic career timeline events"
+    },
+    "team/{memberId}": {
+      "schema": "TeamMember",
+      "description": "Team roles list with dashboard permissions"
+    },
+    "messages/{messageId}": {
+      "schema": "ContactMessage",
+      "description": "Visitor contact requests"
+    },
+    "logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "History of actions taken by administrators"
+    },
+    "analytics/{analyticsId}": {
+      "schema": "AnalyticsMetric",
+      "description": "Daily platform web traffic metrics"
+    }
+  }
+}
